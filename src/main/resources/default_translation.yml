@@ -1,0 +1,74 @@
+# All message patterns here using MiniMessage:
+# https://webui.adventure.kyori.net/
+
+# Placeholders:
+# <jailed_player> - Name of jailed player
+# <jailer> - Name of player who jailed
+# <jail_length> - Text representation of jail length
+# <jail_length_total> - Total jail length in seconds
+# <jail_start> - Text representation of jail start time
+# <reason> - Event reason
+# <datetime> - Date and time of event invocation
+# <date> - Date of event invocation
+# <time> - Date of event invocation
+# <releaser> - Player who released jailed player
+# <case_id> - ID of jail case
+# <element_id> - ID of history element
+
+# Placeholder for reason if no reason provided
+no_reason: No reason
+
+# Message will be sent if command will be executed by player without permission
+no_permission: <red>You don't have permission to execute this command</red>
+
+# Message will be sent if player with specified nickname not found
+player_not_found: <red>Player with nickname <jailed_player> not found</red>
+
+# Message will be sent if player with specified case id not found
+case_id_not_found: <red>Active jail with case id <case_id> not found</red>
+
+history_element_not_found: <red>History element with ID <element_id> not found</red>
+
+player_jailed: <gold><red><jailed_player></red> was jailed by <green><jailer></green> for <color:#a3ffda><jail_length></color> by reason <white>"<reason>"</white></gold>
+player_jailed_permanently: <gold><red><jailed_player></red> was jailed by <green><jailer></green> <color:#770000>PERMANENTLY</color> by reason <white>"<reason>"</white></gold>
+player_released_auto: <yellow><green><jailed_player></green> was released from jail.</yellow>
+player_released_manual: <yellow><green><jailed_player></green> was released from jail by <aqua><releaser></aqua> with reason "<reason>"</yellow>
+
+# Patterns used for timestamp text representation. %s will be replaced with number
+# Output example with default settings: 1mn. 3d. 5h. 32m. 47s.
+timestamp_months: "%smn."
+timestamp_days: "%sd."
+timestamp_hours: "%sh."
+timestamp_minutes: "%sm."
+timestamp_seconds: "%ss."
+
+# Pattern used for date text representation
+# Output example with default settings: 19.12.2022
+date_pattern: <day>.<month>.<year>
+
+# Pattern used for time text representation
+# Output example with default settings: 19:00:00
+time_pattern: "<hour>:<minute>:<second>"
+
+# Pattern used for time text representation
+# Output example with default settings: 19.12.2022 19:00:00
+datetime_pattern: "<day>.<month>.<year> <hour>:<minute>:<second>"
+
+# Messages for "/jail history" command
+history_jail_data: >
+  <yellow>Jail case <green>#<case_id></green>
+    Jailed player: <green><jailed_player></green>
+    Jailed by: <green><jailer></green>
+    Reason: <green><reason></green>
+    Jail length: <green><jail_length></green>
+    Jail date and time: <green><jail_start></green></yellow>
+history_released_data: >
+  <yellow>Jail case <green>#<case_id></green>
+    Jailed player: <green><jailed_player></green>
+    Released by: <green><releaser></green>
+    Released at: <green><datetime></green>
+    Reason: <green><reason></green>
+#Short representations of history elements
+short_history_jailed: "<gold>ID: <green><element_id></green>; <yellow>Jail</yellow>; Jailed player: <jailed_player></gold>"
+short_history_released: "<gold>ID: <green><element_id></green>; <yellow>Release</yellow>; Released player: <jailed_player></gold>"
+short_history_updated: "<gold>ID: <green><element_id></green>; <yellow>Jail update</yellow>; Case id: <yellow><case_id></yellow></gold>"

@@ -1,0 +1,45 @@
+name: Ulyanovsk
+version: '${project.version}'
+main: org.lexize.ulyanovsk.Ulyanovsk
+api-version: 1.19
+prefix: ULN
+authors: [ Lexize ]
+description: Jail plugin. Why Ulyanovsk? Because no one can escape from it hehehaha
+website: https://github.com/lexize/Ulyanovsk
+softdepend:
+  - LuckPerms
+permissions:
+  ulyanovsk.event.jail.see:
+    description: Allows to see notification about player jail
+    default: true
+  ulyanovsk.event.release.auto.see:
+    description: Allows to see notification about player release from jail automatically
+    default: true
+  ulyanovsk.event.release.manual.see:
+    description: Allows to see notification about player release from jail manually
+    default: true
+  ulyanovsk.event.update.reason.see:
+    description: Allows to see notification about jail reason updated by anyone
+    default: false
+  ulyanovsk.event.update.length.see:
+    description: Allows to see notification about jail length updated by anyone
+    default: false
+
+  ulyanovsk.command.visit:
+    description: Allows visit jail world
+    default: op
+  ulyanovsk.command.jail:
+    description: Allows jail players
+    default: op
+  ulyanovsk.command.release:
+    description: Allows release players from jail
+    default: op
+  ulyanovsk.command.update:
+    description: Allows edit jail info
+    default: op
+    children:
+      ulyanovsk.command.update.time: true
+      ulyanovsk.command.update.reason: true
+  ulyanovsk.command.history:
+    description: Allows see any history records with command
+    default: op
