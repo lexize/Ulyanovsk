@@ -66,9 +66,8 @@ public class UlyanovskDB {
     }
     public boolean IsPlayerInJail(String uuid)  {
         try {
-            PreparedStatement statement = _dbConnection.prepareStatement("SELECT count(player_id) = 1 FROM jailed_players WHERE player_id = ? or player_name = ?");
+            PreparedStatement statement = _dbConnection.prepareStatement("SELECT count(player_id) = 1 FROM jailed_players WHERE player_id = ?");
             statement.setString(1, uuid);
-            statement.setString(2, uuid);
             ResultSet result = statement.executeQuery();
             if (result.next()) {
                 boolean val = result.getBoolean(1);

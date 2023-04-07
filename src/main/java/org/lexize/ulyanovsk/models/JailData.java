@@ -3,7 +3,6 @@ package org.lexize.ulyanovsk.models;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.lexize.lomponent.LomponentSerializer;
 import org.lexize.ulyanovsk.Ulyanovsk;
 import org.lexize.ulyanovsk.annotations.SQLAutoincrement;
 import org.lexize.ulyanovsk.annotations.SQLPrimaryKey;
@@ -43,7 +42,7 @@ public class JailData extends DataElement {
             jailer = null;
         }
         OfflinePlayer finalJailer = jailer;
-        return Ulyanovsk.Utils.ParseLomponent(ulyanovsk.getTranslation().getTranslation("short_history_jailed"), new HashMap<>() {{
+        return Ulyanovsk.Utils.ParseMinimessage(ulyanovsk.getTranslation().getTranslation("short_history_jailed"), new HashMap<>() {{
             put("element_id", () -> Integer.toString(element_id));
             put("jailed_player", jailedPlayer::getName);
             put("jailer",() -> finalJailer != null ? finalJailer.getName() : getInvokerUUID());
@@ -70,7 +69,7 @@ public class JailData extends DataElement {
             jailer = null;
         }
         OfflinePlayer finalJailer = jailer;
-        return Ulyanovsk.Utils.ParseLomponent(ulyanovsk.getTranslation().getTranslation("history_jail_data"), new HashMap<>() {{
+        return Ulyanovsk.Utils.ParseMinimessage(ulyanovsk.getTranslation().getTranslation("history_jail_data"), new HashMap<>() {{
             put("element_id", () -> Integer.toString(element_id));
             put("jailed_player", jailedPlayer::getName);
             put("jailer",() -> finalJailer != null ? finalJailer.getName() : getInvokerUUID());

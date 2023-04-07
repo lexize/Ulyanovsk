@@ -56,7 +56,7 @@ public class ReleaseCommand {
         try {
             CommandSender s = ctx.getSource().getBukkitSender();
             if (!s.hasPermission("ulyanovsk.command.release")) {
-                BaseComponent c = Ulyanovsk.Utils.ParseLomponent(getTranslation().getTranslation("no_permission"), null);
+                BaseComponent c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("no_permission"), null);
                 s.spigot().sendMessage(c);
                 return 0;
             }
@@ -65,7 +65,7 @@ public class ReleaseCommand {
                 int caseID = IntegerArgumentType.getInteger(ctx, "case_id");
                 dataToRelease = Ulyanovsk.getInstance().getDatabase().GetJailData(caseID);
                 if (dataToRelease == null) {
-                    BaseComponent c = Ulyanovsk.Utils.ParseLomponent(getTranslation().getTranslation("case_id_not_found"), new HashMap<>() {{
+                    BaseComponent c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("case_id_not_found"), new HashMap<>() {{
                         put("case_id", () -> Integer.toString(caseID));
                     }});
                     s.spigot().sendMessage(c);
@@ -83,7 +83,7 @@ public class ReleaseCommand {
                     }
                 }
                 if (dataToRelease == null) {
-                    BaseComponent c = Ulyanovsk.Utils.ParseLomponent(getTranslation().getTranslation("player_not_found"), new HashMap<>() {{
+                    BaseComponent c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("player_not_found"), new HashMap<>() {{
                         put("jailed_player", () -> playerName);
                     }});
                     s.spigot().sendMessage(c);
@@ -159,7 +159,7 @@ public class ReleaseCommand {
         else invokerID = releaser.getName();
         db.AddRecordToHistory(new ReleaseData(data, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC), reason, invokerID));
         db.RemoveJailRecord(data);
-        BaseComponent bc = Ulyanovsk.Utils.ParseLomponent(
+        BaseComponent bc = Ulyanovsk.Utils.ParseMinimessage(
                 Ulyanovsk.getInstance().getTranslation().getTranslation("player_released_manual"),
                 new HashMap<String, Supplier<String>>() {{
                     put("jailed_player", opl::getName);

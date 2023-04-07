@@ -62,7 +62,7 @@ public class JailCommand {
         try {
             CommandSender s = context.getSource().getBukkitSender();
             if (!s.hasPermission("ulyanovsk.command.jail")) {
-                BaseComponent c = Ulyanovsk.Utils.ParseLomponent(getTranslation().getTranslation("no_permission"), null);
+                BaseComponent c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("no_permission"), null);
                 s.spigot().sendMessage(c);
                 return 0;
             }
@@ -73,16 +73,21 @@ public class JailCommand {
             boolean permanent = time <= 0;
             Player playerToJail = Bukkit.getPlayer(playerName);
             if (playerToJail == null) {
-                BaseComponent c = Ulyanovsk.Utils.ParseLomponent(getTranslation().getTranslation("player_not_found"), new HashMap<>() {{
+                BaseComponent c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("player_not_found"), new HashMap<>() {{
                     put("jailed_player", () -> playerName);
                 }});
+                s.spigot().sendMessage(c);
+                return 0;
+            }
+            if (Ulyanovsk.getInstance().getDatabase().IsPlayerInJail(playerToJail.getUniqueId().toString())) {
+                BaseComponent c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("player_already_jailed"), null);
                 s.spigot().sendMessage(c);
                 return 0;
             }
             Ulyanovsk.getInstance().JailPlayer(s, playerToJail, permanent ? -1: time, reason);
             BaseComponent c;
             if (!permanent) {
-                 c = Ulyanovsk.Utils.ParseLomponent(getTranslation().getTranslation("player_jailed"), new HashMap<>() {{
+                 c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("player_jailed"), new HashMap<>() {{
                     put("jailed_player", () -> playerName);
                     put("jailer", s::getName);
                     put("reason", () -> reason);
@@ -91,7 +96,7 @@ public class JailCommand {
                 }});
             }
             else {
-                 c = Ulyanovsk.Utils.ParseLomponent(getTranslation().getTranslation("player_jailed_permanently"), new HashMap<>() {{
+                 c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("player_jailed_permanently"), new HashMap<>() {{
                     put("jailed_player", () -> playerName);
                     put("jailer", s::getName);
                     put("reason",  () -> reason);
@@ -107,7 +112,7 @@ public class JailCommand {
         try {
             CommandSender s = context.getSource().getBukkitSender();
             if (!s.hasPermission("ulyanovsk.command.jail")) {
-                BaseComponent c = Ulyanovsk.Utils.ParseLomponent(getTranslation().getTranslation("no_permission"), null);
+                BaseComponent c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("no_permission"), null);
                 s.spigot().sendMessage(c);
                 return 0;
             }
@@ -118,16 +123,21 @@ public class JailCommand {
             boolean permanent = time <= 0;
             Player playerToJail = Bukkit.getPlayer(playerName);
             if (playerToJail == null) {
-                BaseComponent c = Ulyanovsk.Utils.ParseLomponent(getTranslation().getTranslation("player_not_found"), new HashMap<>() {{
+                BaseComponent c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("player_not_found"), new HashMap<>() {{
                     put("jailed_player",  () -> playerName);
                 }});
+                s.spigot().sendMessage(c);
+                return 0;
+            }
+            if (Ulyanovsk.getInstance().getDatabase().IsPlayerInJail(playerToJail.getUniqueId().toString())) {
+                BaseComponent c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("player_already_jailed"), null);
                 s.spigot().sendMessage(c);
                 return 0;
             }
             Ulyanovsk.getInstance().JailPlayer(s, playerToJail, permanent ? -1: time, reason);
             BaseComponent c;
             if (!permanent) {
-                c = Ulyanovsk.Utils.ParseLomponent(getTranslation().getTranslation("player_jailed"), new HashMap<>() {{
+                c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("player_jailed"), new HashMap<>() {{
                     put("jailed_player", () -> playerName);
                     put("jailer", s::getName);
                     put("reason", () -> reason);
@@ -136,7 +146,7 @@ public class JailCommand {
                 }});
             }
             else {
-                c = Ulyanovsk.Utils.ParseLomponent(getTranslation().getTranslation("player_jailed_permanent"), new HashMap<>() {{
+                c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("player_jailed_permanent"), new HashMap<>() {{
                     put("jailed_player", () -> playerName);
                     put("jailer", s::getName);
                     put("reason", () -> reason);

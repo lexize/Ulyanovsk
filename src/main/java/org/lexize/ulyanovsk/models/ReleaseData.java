@@ -66,7 +66,7 @@ public class ReleaseData extends DataElement {
             releaser = null;
         }
         OfflinePlayer finalReleaser = releaser;
-        return Ulyanovsk.Utils.ParseLomponent(ulyanovsk.getTranslation().getTranslation("short_history_released"), new HashMap<>() {{
+        return Ulyanovsk.Utils.ParseMinimessage(ulyanovsk.getTranslation().getTranslation("short_history_released"), new HashMap<>() {{
             put("element_id", () -> Integer.toString(element_id));
             put("jailed_player", jailedPlayer::getName);
             put("jailer",() -> finalJailer != null ? finalJailer.getName() : jailerUUID);
@@ -102,7 +102,7 @@ public class ReleaseData extends DataElement {
             releaser = null;
         }
         OfflinePlayer finalReleaser = releaser;
-        return Ulyanovsk.Utils.ParseLomponent(ulyanovsk.getTranslation().getTranslation("history_released_data"), new HashMap<>() {{
+        return Ulyanovsk.Utils.ParseMinimessage(ulyanovsk.getTranslation().getTranslation("history_released_data"), new HashMap<>() {{
             put("element_id", () -> Integer.toString(element_id));
             put("jailed_player", jailedPlayer::getName);
             put("jailer",() -> finalJailer != null ? finalJailer.getName() : jailerUUID);

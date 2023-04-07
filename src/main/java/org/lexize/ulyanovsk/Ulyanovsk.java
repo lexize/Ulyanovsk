@@ -4,9 +4,21 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.Context;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.ParsingException;
+import net.kyori.adventure.text.minimessage.tag.Tag;
+import net.kyori.adventure.text.minimessage.tag.resolver.ArgumentQueue;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.chat.BaseComponentSerializer;
+import net.md_5.bungee.chat.ComponentSerializer;
 import net.minecraft.commands.CommandDispatcher;
 import net.minecraft.commands.CommandListenerWrapper;
 import org.bukkit.*;
@@ -14,8 +26,8 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.craftbukkit.v1_19_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_19_R1.command.VanillaCommandWrapper;
+import org.bukkit.craftbukkit.v1_19_R3.CraftServer;
+import org.bukkit.craftbukkit.v1_19_R3.command.VanillaCommandWrapper;
 import org.bukkit.entity.Player;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.ItemStack;
@@ -24,13 +36,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
-import org.lexize.lomponent.LomponentSerializer;
-import org.lexize.lomponent.LomponentStyleContainer;
-import org.lexize.lomponent.components.Component;
-import org.lexize.lomponent.components.DecorationComponent;
-import org.lexize.lomponent.components.GroupComponent;
-import org.lexize.lomponent.models.Color;
-import org.lexize.lomponent.tags.PlaceholderTag;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.lexize.ulyanovsk.commands.JailCommand;
 import org.lexize.ulyanovsk.commands.JailHistoryCommand;
 import org.lexize.ulyanovsk.commands.ReleaseCommand;
@@ -39,7 +46,6 @@ import org.lexize.ulyanovsk.exceptions.TimestampKeyNotFound;
 import org.lexize.ulyanovsk.exceptions.TimestampNotMatches;
 import org.lexize.ulyanovsk.models.JailData;
 import org.lexize.ulyanovsk.models.JailedPlayerSavedData;
-import org.lexize.ulyanovsk.tags.FunctionalPlaceholderTag;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -79,10 +85,6 @@ public final class Ulyanovsk extends JavaPlugin {
     public UlyanovskTranslation getTranslation() {
         return _translation;
     }
-    private LomponentSerializer _lomponentSerializer;
-    public LomponentSerializer getLomponentSerializer() {
-        return _lomponentSerializer;
-    }
     @Override
     public void onEnable() {
         _instance = this;
@@ -109,7 +111,6 @@ public final class Ulyanovsk extends JavaPlugin {
         _jailWorld = getServer().createWorld(
                 WorldCreator.name(_config.WorldName).generator(new VoidWorldGenerator())
         );
-        _lomponentSerializer = LomponentSerializer.defaultBuilder().build();
         _releaseRunnable = new UlyanovskReleaseRunnable();
         _releaseRunnable.runTaskTimer(this, 0, 20*60);
         Bukkit.getPluginManager().registerEvents(new UlyanovskMainHandler(), this);
@@ -349,85 +350,30 @@ public final class Ulyanovsk extends JavaPlugin {
             return fields;
         }
 
-        //public static BaseComponent ParseLomponent(String sourceText, Map<String, String> placeholders) {
-        //    var serializerBuilder = Ulyanovsk.getInstance().getLomponentSerializer().getBuilder();
-        //    if(placeholders != null) {
-        //        for (Map.Entry<String, String> kv :
-        //                placeholders.entrySet()) {
-        //            serializerBuilder.addTags(new PlaceholderTag(kv.getKey(),kv.getValue()));
-        //        }
-        //    }
-        //    var serializer = serializerBuilder.build();
-        //    GroupComponent c = serializer.parse(sourceText);
-        //    BaseComponent baseComponent = FromLomponentToBaseComponent(c);
-        //    return baseComponent;
-        //}
+        public static BaseComponent ParseMinimessage(String sourceText, Map<String, Supplier<String>> placeholders) {
+            if (placeholders == null) placeholders = new HashMap<>();
+            var minimessage = MiniMessage.miniMessage().deserialize(sourceText, StandardTags.defaults(), new FunctionalPlaceholderTag(placeholders));
+            var gsonString = GsonComponentSerializer.gson().serialize(minimessage);
+            var components = ComponentSerializer.parse(gsonString);
+            ComponentBuilder builder = new ComponentBuilder();
+            builder.append(components);
+            return builder.getCurrentComponent();
+        }
 
-        public static BaseComponent ParseLomponent(String sourceText, Map<String, Supplier<String>> placeholders) {
-            var serializerBuilder = Ulyanovsk.getInstance().getLomponentSerializer().getBuilder();
-            if(placeholders != null) {
-                for (Map.Entry<String, Supplier<String>> kv :
-                        placeholders.entrySet()) {
-                    serializerBuilder.addTags(new FunctionalPlaceholderTag(kv.getKey(),kv.getValue()));
-                }
+        private static class FunctionalPlaceholderTag implements TagResolver {
+            private final Map<String, Supplier<String>> placeholderProviders;
+            FunctionalPlaceholderTag(Map<String, Supplier<String>> placeholderProviders) {
+                this.placeholderProviders = placeholderProviders;
             }
-            var serializer = serializerBuilder.build();
-            GroupComponent c = serializer.parse(sourceText);
-            BaseComponent baseComponent = FromLomponentToBaseComponent(c);
-            return baseComponent;
-        }
+            @Override
+            public @Nullable Tag resolve(@NotNull String name, @NotNull ArgumentQueue arguments, @NotNull Context ctx) throws ParsingException {
+                Supplier<String> supplier = placeholderProviders.get(name);
+                return supplier != null ? Tag.selfClosingInserting(Component.text(supplier.get())) : null;
+            }
 
-        public static BaseComponent FromLomponentToBaseComponent(GroupComponent component) {
-            List<TextComponent> textComponents = new ArrayList<>();
-            _IterateOverComponent(component, textComponents);
-            return new TextComponent(textComponents.toArray(textComponents.toArray(new TextComponent[0])));
-        }
-
-        private static void _IterateOverComponent(GroupComponent component, List<TextComponent> textComponentsList) {
-            for (Component cm :
-                    component.getChildren()) {
-                if (cm instanceof org.lexize.lomponent.components.TextComponent tc) {
-                    LomponentStyleContainer previousStyle = new LomponentStyleContainer();
-                    tc.onStyleGet(previousStyle, 0);
-                    StringBuilder csb = new StringBuilder();
-                    String content = tc.getContent();
-                    for (int i = 0; i <= content.length(); i++) {
-                        LomponentStyleContainer csc = new LomponentStyleContainer();
-                        char c = '.';
-                        if (i < content.length()) {
-                            tc.onStyleGet(csc, i);
-                            c = content.charAt(i);
-                        }
-                        if (i == content.length() || !previousStyle.equals(csc)) {
-                            TextComponent textComponent = new TextComponent(csb.toString());
-                            csb = new StringBuilder();
-                            var styles = previousStyle.getStyles();
-                            for (Map.Entry<Object, Object> kv :
-                                    styles.entrySet()) {
-                                if (kv.getKey() instanceof DecorationComponent.Decoration dec && (boolean)(kv.getValue())) {
-                                    switch (dec) {
-                                        case Bold -> textComponent.setBold(true);
-                                        case Italic -> textComponent.setItalic(true);
-                                        case Obfuscated -> textComponent.setObfuscated(true);
-                                        case Underlined -> textComponent.setUnderlined(true);
-                                        case Strikethrough -> textComponent.setStrikethrough(true);
-                                    }
-                                }
-                                else if (kv.getValue() instanceof Color color) {
-                                    textComponent.setColor(ChatColor.of(new java.awt.Color(color.getR(), color.getG(), color.getB())));
-                                }
-                            }
-
-                            textComponentsList.add(textComponent);
-                            previousStyle = csc;
-                        }
-                        if (i == content.length()) break;
-                        csb.append(c);
-                    }
-                }
-                else if (cm instanceof GroupComponent gc) {
-                    _IterateOverComponent(gc, textComponentsList);
-                }
+            @Override
+            public boolean has(@NotNull String name) {
+                return placeholderProviders.containsKey(name);
             }
         }
 
@@ -450,7 +396,7 @@ public final class Ulyanovsk extends JavaPlugin {
 
         public static String GetDateString(long epoch) {
             var dateTime = LocalDateTime.ofEpochSecond(epoch, 0, ZoneOffset.UTC);
-            return BaseComponent.toPlainText(ParseLomponent(Ulyanovsk.getInstance().getTranslation().getTranslation("date_pattern"), new HashMap<>() {{
+            return BaseComponent.toPlainText(ParseMinimessage(Ulyanovsk.getInstance().getTranslation().getTranslation("date_pattern"), new HashMap<>() {{
                 put("day", () -> Integer.toString(dateTime.getDayOfMonth()));
                 put("month", () -> Integer.toString(dateTime.getMonthValue()));
                 put("year", () -> Integer.toString(dateTime.getYear()));
@@ -459,7 +405,7 @@ public final class Ulyanovsk extends JavaPlugin {
 
         public static String GetTimeString(long epoch) {
             var dateTime = LocalDateTime.ofEpochSecond(epoch, 0, ZoneOffset.UTC);
-            return BaseComponent.toPlainText(ParseLomponent(Ulyanovsk.getInstance().getTranslation().getTranslation("time_pattern"), new HashMap<>() {{
+            return BaseComponent.toPlainText(ParseMinimessage(Ulyanovsk.getInstance().getTranslation().getTranslation("time_pattern"), new HashMap<>() {{
                 put("second", () -> Integer.toString(dateTime.getSecond()));
                 put("minute", () -> Integer.toString(dateTime.getMinute()));
                 put("hour", () -> Integer.toString(dateTime.getHour()));
@@ -468,7 +414,7 @@ public final class Ulyanovsk extends JavaPlugin {
 
         public static String GetDatetimeString(long epoch) {
             var dateTime = LocalDateTime.ofEpochSecond(epoch, 0, ZoneOffset.UTC);
-            return BaseComponent.toPlainText(ParseLomponent(Ulyanovsk.getInstance().getTranslation().getTranslation("datetime_pattern"), new HashMap<>() {{
+            return BaseComponent.toPlainText(ParseMinimessage(Ulyanovsk.getInstance().getTranslation().getTranslation("datetime_pattern"), new HashMap<>() {{
                 put("day", () -> Integer.toString(dateTime.getDayOfMonth()));
                 put("month", () -> Integer.toString(dateTime.getMonthValue()));
                 put("year", () -> Integer.toString(dateTime.getYear()));

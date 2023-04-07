@@ -3,7 +3,6 @@ package org.lexize.ulyanovsk.commands;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import jdk.jfr.DataAmount;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.minecraft.commands.CommandListenerWrapper;
 import org.bukkit.command.CommandSender;
@@ -11,7 +10,6 @@ import org.lexize.ulyanovsk.Ulyanovsk;
 import org.lexize.ulyanovsk.UlyanovskTranslation;
 import org.lexize.ulyanovsk.models.DataElement;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +43,7 @@ public class JailHistoryCommand {
             var db = Ulyanovsk.getInstance().getDatabase();
             CommandSender s = ctx.getSource().getBukkitSender();
             if (!s.hasPermission("ulyanovsk.command.history")) {
-                BaseComponent c = Ulyanovsk.Utils.ParseLomponent(getTranslation().getTranslation("no_permission"), null);
+                BaseComponent c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("no_permission"), null);
                 s.spigot().sendMessage(c);
                 return 0;
             }
@@ -67,14 +65,14 @@ public class JailHistoryCommand {
             var db = Ulyanovsk.getInstance().getDatabase();
             CommandSender s = ctx.getSource().getBukkitSender();
             if (!s.hasPermission("ulyanovsk.command.history")) {
-                BaseComponent c = Ulyanovsk.Utils.ParseLomponent(getTranslation().getTranslation("no_permission"), null);
+                BaseComponent c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("no_permission"), null);
                 s.spigot().sendMessage(c);
                 return 0;
             }
             int elementId = IntegerArgumentType.getInteger(ctx, "element_id");
             DataElement element = db.GetRecordFromHistory(elementId);
             if (element == null) {
-                BaseComponent c = Ulyanovsk.Utils.ParseLomponent(getTranslation().getTranslation("history_element_not_found"), new HashMap<>(){{
+                BaseComponent c = Ulyanovsk.Utils.ParseMinimessage(getTranslation().getTranslation("history_element_not_found"), new HashMap<>(){{
                     put("element_id", () -> Integer.toString(elementId));
                 }});
                 s.spigot().sendMessage(c);

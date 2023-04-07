@@ -6,7 +6,6 @@
 # <jailer> - Name of player who jailed
 # <jail_length> - Text representation of jail length
 # <jail_length_total> - Total jail length in seconds
-# <jail_start> - Text representation of jail start time
 # <reason> - Event reason
 # <datetime> - Date and time of event invocation
 # <date> - Date of event invocation
@@ -23,6 +22,9 @@ no_permission: <red>You don't have permission to execute this command</red>
 
 # Message will be sent if player with specified nickname not found
 player_not_found: <red>Player with nickname <jailed_player> not found</red>
+
+# Message will be sent if player is already in jail
+player_already_in_jail: <red><jailed_player> is already in jail</red>
 
 # Message will be sent if player with specified case id not found
 case_id_not_found: <red>Active jail with case id <case_id> not found</red>
@@ -61,7 +63,7 @@ history_jail_data: >
     Jailed by: <green><jailer></green>
     Reason: <green><reason></green>
     Jail length: <green><jail_length></green>
-    Jail date and time: <green><jail_start></green></yellow>
+    Jail date and time: <green><datetime></green></yellow>
 history_released_data: >
   <yellow>Jail case <green>#<case_id></green>
     Jailed player: <green><jailed_player></green>
